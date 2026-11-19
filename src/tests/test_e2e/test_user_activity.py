@@ -234,6 +234,7 @@ async def test_user_activity_persisted_in_mongo(
 async def test_second_connection_same_user_does_not_rebroadcast(
         e2e_client: AsyncClient,
         e2e_db_session: AsyncSession,
+        mongo_db: AsyncDatabase,
         reset_db_once_for_e2e: Any,
         seed_user_groups: Any,
         cleanup_mongo_user_activity: Any,
@@ -277,6 +278,11 @@ async def test_second_connection_same_user_does_not_rebroadcast(
 
                 with pytest.raises(asyncio.TimeoutError):
                     await asyncio.wait_for(observer_ws.receive_json(), timeout=1.0)
+
+                record = await mongo_db["user_activity"].find_one({"user_id": user1_id})
+                assert record is not None
+                assert record["status"] == "online"
+                assert record.get("disconnected_at") is None
 
             disconnect_event = await _receive_json(observer_ws)
             assert disconnect_event["event"] == "user_disconnected", (
