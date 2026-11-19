@@ -810,7 +810,7 @@ Client -> WS endpoint -> UserActivityService.process()
                               ├─ send the client an online_users snapshot
                               └─ read messages until the client disconnects
                                      ├─ ws_manager.disconnect(...)
-                                     └─ mark the user offline if no connections remain
+                                     └─ activity_repo.update_user_activity(status=offline)
 ```
 
 `UserActivityWebSocketManager` is the "address book" of active sockets in the
@@ -980,11 +980,9 @@ the raw `WebSocket`. Sequence of actions:
    client disconnects.
 8. On `WebSocketDisconnect`:
    - call `activity_ws_manager.disconnect(user_id, websocket)`;
-   - when the user's last socket closes, mark the user as `offline` via
-     `update_user_activity(...)` and set `disconnected_at`;
-   - while another socket is open, keep the user `online` and preserve
-     `disconnected_at`. This follows the same last-connection rule as the
-     `user_disconnected` event in Step 2.
+   - mark the user as `offline` via `update_user_activity(...)` and set
+     `disconnected_at` each time a socket closes, even if another tab is open.
+     The manager broadcasts `user_disconnected` when the last socket closes.
 
 ---
 

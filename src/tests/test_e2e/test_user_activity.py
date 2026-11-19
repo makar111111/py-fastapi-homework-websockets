@@ -241,7 +241,7 @@ async def test_second_connection_same_user_does_not_rebroadcast(
 ) -> None:
     """
     Opening a second tab keeps a single "user_connected" event.
-    Closing it keeps the user online in MongoDB. A "user_disconnected"
+    Closing either tab records the disconnect in MongoDB. A "user_disconnected"
     event is sent when the last tab closes.
     """
     user1_id, token1 = await _register_activate_and_login(
@@ -281,8 +281,8 @@ async def test_second_connection_same_user_does_not_rebroadcast(
 
                 record = await mongo_db["user_activity"].find_one({"user_id": user1_id})
                 assert record is not None
-                assert record["status"] == "online"
-                assert record.get("disconnected_at") is None
+                assert record["status"] == "offline"
+                assert record.get("disconnected_at") is not None
 
             disconnect_event = await _receive_json(observer_ws)
             assert disconnect_event["event"] == "user_disconnected", (

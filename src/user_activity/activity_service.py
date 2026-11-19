@@ -43,8 +43,8 @@ class UserActivityService(UserActivityServiceInterface):
 
         Accepts the connection, authenticates the user via a token sent as the
         first message, registers the connection, broadcasts online status,
-        and removes the socket on disconnect. The user goes offline after
-        their last socket closes.
+        and records the offline status and timestamp whenever an authenticated
+        socket disconnects.
 
         Args:
             websocket (WebSocket): The incoming WebSocket connection.
@@ -94,12 +94,11 @@ class UserActivityService(UserActivityServiceInterface):
                     try:
                         await self.activity_ws_manager.disconnect(user_id, websocket)
                     finally:
-                        if not self.activity_ws_manager.has_active_connections(user_id):
-                            await self.activity_repo.update_user_activity(
-                                UpdateUserActivitySchema(
-                                    user_id=user_id, status="offline", disconnected_at=datetime.now(timezone.utc)
-                                )
+                        await self.activity_repo.update_user_activity(
+                            UpdateUserActivitySchema(
+                                user_id=user_id, status="offline", disconnected_at=datetime.now(timezone.utc)
                             )
+                        )
 
     async def _authenticate(self, websocket: WebSocket) -> int:
         message = await asyncio.wait_for(websocket.receive_json(), timeout=AUTH_TIMEOUT_SECONDS)

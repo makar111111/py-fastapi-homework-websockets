@@ -55,10 +55,6 @@ class UserActivityWebSocketManagerInterface(ABC):
     """Abstract interface for managing active WebSocket connections and broadcasting activity events."""
 
     @abstractmethod
-    def has_active_connections(self, user_id: int) -> bool:
-        """Return whether the user has at least one open connection."""
-
-    @abstractmethod
     def connection_lock(self) -> Lock:
         """Return the lock that orders presence changes and initial snapshots."""
 

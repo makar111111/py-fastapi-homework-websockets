@@ -16,9 +16,6 @@ class UserActivityWebSocketManager(UserActivityWebSocketManagerInterface):
         self.active_connections: Dict[int, List[WebSocket]] = {}
         self._connection_lock = Lock()
 
-    def has_active_connections(self, user_id: int) -> bool:
-        return bool(self.active_connections.get(user_id))
-
     def connection_lock(self) -> Lock:
         return self._connection_lock
 
