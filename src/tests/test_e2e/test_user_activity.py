@@ -240,9 +240,9 @@ async def test_second_connection_same_user_does_not_rebroadcast(
         cleanup_mongo_user_activity: Any,
 ) -> None:
     """
-    A single user opening a second tab (second websocket) must not
-    trigger another "user_connected" broadcast to other users, and
-    closing just one of the two tabs must not trigger "user_disconnected".
+    Opening a second tab keeps a single "user_connected" event.
+    Closing it keeps the user online in MongoDB. A "user_disconnected"
+    event is sent when the last tab closes.
     """
     user1_id, token1 = await _register_activate_and_login(
         e2e_client, e2e_db_session, email="two_tabs@example.com"

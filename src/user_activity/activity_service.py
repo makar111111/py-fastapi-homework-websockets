@@ -43,7 +43,8 @@ class UserActivityService(UserActivityServiceInterface):
 
         Accepts the connection, authenticates the user via a token sent as the
         first message, registers the connection, broadcasts online status,
-        and cleans up (marking the user offline) once the connection closes.
+        and removes the socket on disconnect. The user goes offline after
+        their last socket closes.
 
         Args:
             websocket (WebSocket): The incoming WebSocket connection.
